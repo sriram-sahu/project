@@ -56,8 +56,67 @@ const CreateTodo = () => {
     setSelectedUser(e.target.value);
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const companyId = Cookies.get("companyId");
+    const accessToken = Cookies.get("token");
+
+    const payload = {
+      assigned_user: selectedUser,
+      task_date: date,
+      task_time: time,
+      seconds: convertTimeToSeconds(time),
+      is_completed: 0,
+      time_zone: getCurrentTimeZone(),
+      task_msg: taskDescription,
+    };
+
+    try {
+      const response = await fetch(
+        `https://stage.api.sloovi.com/task/lead_65b171d46f3945549e3baa997e3fc4c2?company_id=${companyId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + accessToken,
+            Accept: "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (response.ok) {
+        // TODO: Handle success
+        console.log("Task added successfully");
+      } else {
+        // TODO: Handle error
+        console.log("Failed to add task");
+      }
+      setDate("");
+      setTime("");
+      setSelectedUser("");
+      setTaskDescription("");
+      setUserDetails([]);
+    } catch (error) {
+      console.log("An error occurred:", error);
+    }
+  };
+
+  // Helper function to convert time to seconds
+  const convertTimeToSeconds = (time) => {
+    const [hours, minutes] = time.split(":");
+    return parseInt(hours) * 3600 + parseInt(minutes) * 60;
+  };
+
+  // Helper function to get the current timezone in seconds
+  const getCurrentTimeZone = () => {
+    const currentTimezoneOffset = new Date().getTimezoneOffset();
+    return -currentTimezoneOffset * 60;
+  };
+
   return (
-    <div className="create-todo-container">
+    <form className="create-todo-container" onSubmit={handleSubmit}>
       <div className="form-group">
         <label htmlFor="task">Task Description</label>
         <input
@@ -67,7 +126,7 @@ const CreateTodo = () => {
           onChange={handleTaskDescriptionChange}
         />
       </div>
-      <div className="form-group">
+      <div className="form-group date-time-container">
         <div>
           <label htmlFor="date">Date</label>
           <input
@@ -98,7 +157,10 @@ const CreateTodo = () => {
           ))}
         </select>
       </div>
-    </div>
+      <div className="display-container">
+        <button type="submit">Add Todo</button>
+      </div>
+    </form>
   );
 };
 
