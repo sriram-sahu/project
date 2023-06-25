@@ -78,7 +78,7 @@ const TaskList = () => {
           console.log("Failed to delete task");
         }
       } catch (error) {
-        console.log("An error occurred:", error);
+        console.log("An error occured:", error);
       }
     }
   };
